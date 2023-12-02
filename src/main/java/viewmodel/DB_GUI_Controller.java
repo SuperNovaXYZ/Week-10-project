@@ -44,6 +44,9 @@ public class DB_GUI_Controller implements Initializable {
     private final DbConnectivityClass cnUtil = new DbConnectivityClass();
     private final ObservableList<Person> data = cnUtil.getData();
 
+    @FXML
+    private Button editButton, deleteButton;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
@@ -57,11 +60,16 @@ public class DB_GUI_Controller implements Initializable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        editButton.disableProperty().bind(tv.getSelectionModel().selectedItemProperty().isNull());
+        deleteButton.disableProperty().bind(tv.getSelectionModel().selectedItemProperty().isNull());
     }
 
     @FXML
     protected void addNewRecord() {
-
+        if (!isValidForm()) {
+            // Show an alert or handle invalid form data
+            return;
+        }
             Person p = new Person(first_name.getText(), last_name.getText(), department.getText(),
                     major.getText(), email.getText(), imageURL.getText());
             cnUtil.insertUser(p);
@@ -69,6 +77,9 @@ public class DB_GUI_Controller implements Initializable {
             p.setId(cnUtil.retrieveId(p));
             data.add(p);
             clearForm();
+        // Display a status message
+        statusLabel.setText("Data added successfully!"); // You can customize the message
+
 
     }
 
@@ -227,6 +238,28 @@ public class DB_GUI_Controller implements Initializable {
             this.lname = date;
             this.major = venue;
         }
+    }
+
+    private boolean isValidForm() {
+        // Check if required fields are not empty
+        if (first_name.getText().isEmpty() || last_name.getText().isEmpty() ||
+                department.getText().isEmpty() || major.getText().isEmpty() ||
+                email.getText().isEmpty()) {
+            showAlert("Please fill in all required fields.");
+            return false;
+        }
+
+        // You can add additional validation logic here based on your requirements
+
+        return true;
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Form Validation Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
 }
